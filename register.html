@@ -1,133 +1,94 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crédito Seguro · Registro</title>
-  <link rel="stylesheet" href="styles.css"/>
-</head>
-<body>
-  <div class="container">
-    <div class="card" style="max-width:640px;margin:40px auto">
-      <h1>Crear cuenta</h1>
-      <div class="hr"></div>
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
 
-      <form id="registerForm">
-        <div class="row">
-          <div>
-            <label>Correo</label>
-            <input id="email" type="email" required />
-          </div>
-          <div>
-            <label>Contraseña</label>
-            <input id="password" type="password" required />
-          </div>
-        </div>
+<script src="js/dom-ready.js?v=1"></script>
+<script src="js/firebase-config.js?v=13"></script>
+<script src="js/api-config.js?v=13"></script>
 
-        <div class="row">
-          <div>
-            <label>DNI (autocompleta nombres)</label>
-            <input id="dni" type="text" minlength="8" maxlength="8" placeholder="8 dígitos" required />
-          </div>
-          <div>
-            <label>Nombres</label>
-            <input id="nombres" type="text" required />
-          </div>
-        </div>
+<script>
+  // Inicializa Firebase
+  const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(window.FIREBASE_CFG);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
 
-        <div class="row">
-          <div>
-            <label>Apellidos</label>
-            <input id="apellidos" type="text" required />
-          </div>
-          <div>
-            <label>Teléfono</label>
-            <input id="telefono" type="text" />
-          </div>
-        </div>
+  // Helpers
+  const $ = (id) => document.getElementById(id);
 
-        <div style="display:flex;gap:12px;margin-top:12px">
-          <button class="btn btn-primary" type="submit">Registrar</button>
-          <a class="btn" href="index.html">Volver a login</a>
-        </div>
-      </form>
+  // --- Autocompletar Nombres/Apellidos por DNI (apiperu) ---
+  async function lookupDni(dni){
+    if(!/^\d{8}$/.test(dni)) return { ok:false, msg:"El DNI debe tener 8 dígitos." };
+    const token = window?.APIPERU?.token;
+    const base  = window?.APIPERU?.baseUrl || "https://apiperu.dev/api";
+    if(!token) return { ok:false, msg:"Falta configurar js/api-config.js con tu token de apiperu." };
 
-      <div id="regMsg" class="alert hidden"></div>
-    </div>
-  </div>
+    try{
+      const r = await fetch(`${base}/dni/${dni}`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
+      });
+      if(!r.ok) return { ok:false, msg:`API error ${r.status}` };
+      const j = await r.json();
+      const d = j.data || {};
+      const nombres   = (d.nombres||"").trim();
+      const apellidos = [d.apellido_paterno, d.apellido_materno].filter(Boolean).map(s=>String(s).trim()).join(" ");
+      if(!nombres && !apellidos) return { ok:false, msg:"El API no devolvió nombres/apellidos." };
+      return { ok:true, data:{ dni, nombres, apellidos } };
+    }catch(e){ return { ok:false, msg:e.message }; }
+  }
 
-  <!-- Firebase compat SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
-
-  <!-- Configs + lógica -->
-  <script src="js/firebase-config.js?v=6"></script>
-  <script src="js/api-config.js"></script> <!-- usa tu token de apiperu -->
-  <script src="js/auth.js?v=6"></script>   <!-- ya trae verifyClientIdentity() -->
-
-  <script>
-    const auth = window._auth, db = window._db;
-    const $ = (id)=>document.getElementById(id);
-    const msg = $("regMsg");
-
-    // --- Autocompletar por DNI (apiperu) ---
-    // dispara cuando hay exactamente 8 dígitos o al salir del campo
+  onReady(() => {
+    // Autocompletar al escribir 8 dígitos (con debounce)
     let timer = null;
-    const fetchIfReady = async () => {
-      const dni = $("dni").value.trim();
-      if (!/^\d{8}$/.test(dni)) return;
-      msg.className = "alert"; msg.textContent = "Consultando DNI...";
-      const r = await window.verifyClientIdentity(dni);
-      if (!r.ok) {
-        msg.className = "alert err"; msg.textContent = r.msg;
-        return;
-      }
-      $("nombres").value = r.data.nombres || "";
-      $("apellidos").value = r.data.apellidos || "";
-      msg.className = "alert ok"; msg.textContent = "Datos autocompletados desde apiperu.";
-    };
-
-    $("dni").addEventListener("input", () => {
+    on("dni", "input", () => {
       clearTimeout(timer);
-      timer = setTimeout(fetchIfReady, 500); // debounce
+      timer = setTimeout(async () => {
+        const dni = $("dni")?.value.trim();
+        if(!/^\d{8}$/.test(dni)) return;
+        const msg = $("regMsg"); if(msg){ msg.className="alert"; msg.textContent="Consultando DNI..."; }
+        const r = await lookupDni(dni);
+        if(!r.ok){ if(msg){ msg.className="alert err"; msg.textContent=r.msg; } return; }
+        $("nombres") && ( $("nombres").value = r.data.nombres || "" );
+        $("apellidos") && ( $("apellidos").value = r.data.apellidos || "" );
+        if(msg){ msg.className="alert ok"; msg.textContent="Datos autocompletados desde apiperu."; }
+      }, 500);
     });
-    $("dni").addEventListener("blur", fetchIfReady);
 
-    // --- Registro de usuario + alta del cliente (Firestore) ---
-    $("registerForm").addEventListener("submit", async (e) => {
+    // --- Registro de usuario ---
+    on("registerForm", "submit", async (e) => {
       e.preventDefault();
-      const email = $("email").value.trim();
-      const password = $("password").value;
-      const dni = $("dni").value.trim();
-      const nombres = $("nombres").value.trim();
-      const apellidos = $("apellidos").value.trim();
-      const telefono = $("telefono").value.trim();
+      const email     = $("email")?.value.trim();
+      const password  = $("password")?.value;
+      const dni       = $("dni")?.value.trim();
+      const nombres   = $("nombres")?.value.trim();
+      const apellidos = $("apellidos")?.value.trim();
+      const telefono  = $("telefono")?.value.trim();
+      const msg = $("regMsg");
 
-      try {
-        if (!/^\d{8}$/.test(dni)) throw new Error("El DNI debe tener 8 dígitos.");
+      try{
+        if(!/^\d{8}$/.test(dni)) throw new Error("El DNI debe tener 8 dígitos.");
         const cred = await auth.createUserWithEmailAndPassword(email, password);
         await db.collection("clients").doc(dni).set({
           dni, nombres, apellidos, telefono,
           createdBy: cred.user.uid,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-
-        msg.className = "alert ok";
-        msg.textContent = "Cuenta creada y cliente registrado. Ya puedes iniciar sesión.";
-      } catch (err) {
+        }, { merge:true });
+        if(msg){ msg.className="alert ok"; msg.textContent="Cuenta creada y cliente registrado. Ya puedes iniciar sesión."; }
+      }catch(err){
+        console.error("REGISTER ERROR:", err.code, err.message);
+        if(!msg) return;
         msg.className = "alert err";
         if (err.code === "auth/email-already-in-use") {
-          msg.innerHTML = `Este correo ya está registrado. 
-            <a href="reset.html">Recupera tu contraseña</a> o 
-            <a href="index.html">inicia sesión</a>.`;
+          msg.innerHTML = `Este correo ya está registrado. <a href="reset.html">Recupera tu contraseña</a> o <a href="index.html">inicia sesión</a>.`;
         } else if (err.code === "auth/weak-password") {
           msg.textContent = "La contraseña es demasiado débil.";
+        } else if (err.code === "auth/operation-not-allowed") {
+          msg.textContent = "Habilita Email/Password en Firebase → Authentication → Sign-in method.";
+        } else if (err.code === "auth/invalid-api-key" || err.code === "auth/invalid-config") {
+          msg.textContent = "Revisa js/firebase-config.js (apiKey/authDomain/projectId).";
         } else {
           msg.textContent = err.message || "Ocurrió un error al registrar.";
         }
       }
     });
-  </script>
-</body>
-</html>
+  });
+</script>
