@@ -1,42 +1,53 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Crédito Seguro · Dashboard</title>
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
   <div class="container">
-    
-<div class="nav">
-  <div class="badge">Crédito Seguro</div>
-  <div class="spacer"></div>
-  <a href="dashboard.html" class="btn">Dashboard</a>
-  <button id="logoutBtn" class="btn btn-danger">Salir</button>
-</div>
-<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
-<script src="js/firebase-config.js"></script>
-<script src="js/auth.js"></script>
+    <div class="nav">
+      <div class="badge">Crédito Seguro</div>
+      <div class="spacer"></div>
+      <a href="admin.html" class="btn">Admin</a>
+      <button id="logoutBtn" class="btn btn-danger">Salir</button>
+    </div>
 
     <div class="card">
       <h2>Nuevo préstamo</h2>
-      <p class="small">Verifica identidad, configura montos, tasas, IGV e impuestos, genera cronograma y guarda en Firestore.</p>
+      <p class="small">Selecciona un cliente, configura montos, tasas, IGV e impuestos, genera cronograma y guarda en Firestore.</p>
       <div class="hr"></div>
 
+      <!-- 1) Alta rápida usando API (apiperu.dev) -->
+      <h3>Nuevo cliente por DNI (apiperu)</h3>
       <div class="row">
         <div>
-          <label>DNI del cliente</label>
-          <input id="dni" type="text" minlength="8" maxlength="8" placeholder="8 dígitos"/>
+          <label>DNI</label>
+          <div class="flex">
+            <input id="newDni" type="text" placeholder="8 dígitos" minlength="8" maxlength="8"/>
+            <button id="addClientBtn" class="btn" type="button">Consultar y crear</button>
+          </div>
         </div>
-        <div style="display:flex;align-items:end">
-          <button id="verifyBtn" class="btn">Verificar identidad</button>
+        <div>
+          <label>Resultado</label>
+          <div id="addClientMsg" class="alert small"></div>
+        </div>
+      </div>
+      <div class="hr"></div>
+
+      <!-- 2) Selector de cliente existente -->
+      <div class="row">
+        <div>
+          <label>Selecciona cliente</label>
+          <input id="clientSearch" placeholder="Buscar por DNI o nombre..." />
+          <div id="clientList" class="small"></div>
         </div>
       </div>
       <div id="verifyMsg" class="alert small"></div>
 
+      <!-- 3) Formulario del préstamo -->
       <form id="loanForm">
         <div class="row3">
           <div>
@@ -66,7 +77,7 @@
             <input id="fecha" type="date"/>
           </div>
         </div>
-        <div style="display:flex;gap:12px;margin-top:12px">
+        <div class="flex" style="margin-top:12px">
           <button class="btn btn-primary" type="submit">Generar cronograma</button>
           <button class="btn" type="button" id="exportPdf">Exportar PDF</button>
         </div>
@@ -95,27 +106,23 @@
       </div>
     </div>
 
-    
-<footer>© 2025 · Crédito Seguro · Demo para GitHub Pages</footer>
-
+    <footer>© Crédito Seguro · Demo</footer>
   </div>
 
-  <!-- libs -->
+  <!-- SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-  <!-- app -->
-  <script src="js/firebase-config.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/loans.js"></script>
+  <!-- Config + API + App (AQUÍ va tu API) -->
+  <script src="js/firebase-config.js?v=4"></script>
+  <script src="js/api-config.js"></script> <!-- <- aquí se cargan token/baseUrl de apiperu.dev -->
+  <script src="js/auth.js?v=4"></script>
+  <script src="js/loans.js?v=4"></script>
 
   <script>
-    // Guard simple de sesión en dashboard
-    window.requireAuth(true).then(()=>{
-      window._bindLogout();
-    });
+    window.requireAuth(true).then(()=> window._bindLogout());
   </script>
 </body>
 </html>
