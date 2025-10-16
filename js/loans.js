@@ -265,12 +265,62 @@ Marvini — aquí tienes **`js/loans.js` completo** ya con: alta rápida de clie
     }
 
     // (4) Export PDF
-    const exportBtn = f("exportPdf");
-    if (exportBtn) {
-      exportBtn.addEventListener("click", exportPdf);
+// === Exportar PDF robusto ===
+async function exportPdf() {
+  try {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert("No se pudo cargar jsPDF. Refresca con Ctrl+F5 y prueba de nuevo.");
+      return;
     }
-  }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
 
-  document.addEventListener("DOMContentLoaded", init);
-})();
+    // Título
+    doc.setFontSize(14);
+    doc.text("Cronograma de Pagos - Crédito Seguro", 40, 40);
+
+    // Encabezados
+    doc.setFontSize(10);
+    const headers = ["#", "Fecha", "Cuota Base", "Interés", "IGV", "Otros", "Amort.", "Cuota Total", "Saldo"];
+    let y = 70;
+    doc.text(headers.join(" | "), 40, y);
+    y += 14;
+
+    // Filas (lee la tabla que ya renderizaste)
+    const trs = Array.from(document.querySelectorAll("#tbodySchedule tr"));
+    if (!trs.length) {
+      alert("Primero genera el cronograma.");
+      return;
+    }
+
+    for (const tr of trs) {
+      const cols = Array.from(tr.children).map(td => (td.textContent || "").trim());
+      if (y > 780) { doc.addPage(); y = 40; }
+      doc.text(cols.join(" | "), 40, y);
+      y += 14;
+    }
+
+    // Totales
+    if (y > 740) { doc.addPage(); y = 40; }
+    doc.setFontSize(12);
+    doc.text("Totales", 40, y + 10);
+    doc.setFontSize(10);
+    doc.text(`Principal: ${document.getElementById("kpiPrincipal").textContent}`, 40, y + 28);
+    doc.text(`Intereses: ${document.getElementById("kpiInteres").textContent}`, 40, y + 44);
+    doc.text(`IGV: ${document.getElementById("kpiIGV").textContent}`, 40, y + 60);
+    doc.text(`Total: ${document.getElementById("kpiTotal").textContent}`, 40, y + 76);
+
+    doc.save("cronograma_pagos.pdf");
+  } catch (err) {
+    console.error("PDF ERROR:", err);
+    alert("No se pudo exportar el PDF: " + (err.message || err));
+  }
+}
+
+// Vuelve a enganchar el botón (por si el DOM carga diferente)
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("exportPdf");
+  if (btn) btn.addEventListener("click", exportPdf);
+});
+
 ```
