@@ -11,7 +11,6 @@
     <div class="nav">
       <div class="badge">Crédito Seguro</div>
       <div class="spacer"></div>
-      <!-- SIN botón Admin -->
       <button id="logoutBtn" class="btn btn-danger">Salir</button>
     </div>
 
@@ -98,10 +97,10 @@
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-  <!-- Config + App (SIN api-config.js) -->
-  <script src="js/firebase-config.js?v=6"></script>
-  <script src="js/auth.js?v=6"></script>
-  <script src="js/loans.js?v=6"></script>
+  <!-- Config + App -->
+  <script src="js/firebase-config.js?v=8"></script>
+  <script src="js/auth.js?v=8"></script>
+  <script src="js/loans.js?v=8"></script>
 
   <script>
     window.requireAuth(true).then(()=> window._bindLogout());
