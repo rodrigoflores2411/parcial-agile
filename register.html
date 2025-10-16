@@ -11,80 +11,113 @@
     <div class="card" style="max-width:640px;margin:40px auto">
       <h1>Crear cuenta</h1>
       <div class="hr"></div>
+
       <form id="registerForm">
         <div class="row">
           <div>
             <label>Correo</label>
-            <input id="email" type="email" required/>
+            <input id="email" type="email" required />
           </div>
           <div>
             <label>Contraseña</label>
-            <input id="password" type="password" required/>
+            <input id="password" type="password" required />
           </div>
         </div>
+
         <div class="row">
           <div>
             <label>DNI (para vincular perfil)</label>
-            <input id="dni" type="text" minlength="8" maxlength="8" required/>
+            <div style="display:flex; gap:8px;">
+              <input id="dni" type="text" minlength="8" maxlength="8" required />
+              <button id="dniLookup" type="button" class="btn">Consultar por DNI</button>
+            </div>
           </div>
           <div>
             <label>Nombres</label>
-            <input id="nombres" type="text" required/>
+            <input id="nombres" type="text" required />
           </div>
         </div>
+
         <div class="row">
           <div>
             <label>Apellidos</label>
-            <input id="apellidos" type="text" required/>
+            <input id="apellidos" type="text" required />
           </div>
           <div>
             <label>Teléfono</label>
-            <input id="telefono" type="text"/>
+            <input id="telefono" type="text" />
           </div>
         </div>
+
         <div style="display:flex;gap:12px;margin-top:12px">
           <button class="btn btn-primary" type="submit">Registrar</button>
           <a class="btn" href="index.html">Volver a login</a>
         </div>
       </form>
+
       <div id="regMsg" class="alert hidden"></div>
     </div>
   </div>
 
+  <!-- SDKs Firebase (compat) -->
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
+
+  <!-- Configs y lógica -->
   <script src="js/firebase-config.js"></script>
+  <script src="js/api-config.js"></script> <!-- aquí vive window.APIPERU.token -->
+  <script src="js/auth.js"></script>
+
   <script>
-    const app = firebase.initializeApp(window.FIREBASE_CFG);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    // Refs
+    const auth = window._auth;
+    const db = window._db;
 
-    document.getElementById("registerForm").addEventListener("submit", async (e)=>{
+    const $ = (id) => document.getElementById(id);
+    const msg = $("regMsg");
+
+    // 1) Botón: Consultar por DNI (apiperu.dev)
+    $("dniLookup").addEventListener("click", async () => {
+      const dni = $("dni").value.trim();
+      msg.className = "alert"; msg.textContent = "Consultando DNI...";
+      const r = await window.verifyClientIdentity(dni);
+      if (!r.ok) {
+        msg.className = "alert err";
+        msg.textContent = r.msg;
+        return;
+      }
+      $("nombres").value = r.data.nombres || "";
+      $("apellidos").value = r.data.apellidos || "";
+      msg.className = "alert ok";
+      msg.textContent = "DNI verificado y datos completados.";
+    });
+
+    // 2) Registro de usuario + alta del cliente (Firestore)
+    $("registerForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const dni = document.getElementById("dni").value.trim();
-      const nombres = document.getElementById("nombres").value.trim();
-      const apellidos = document.getElementById("apellidos").value.trim();
-      const telefono = document.getElementById("telefono").value.trim();
-      const msg = document.getElementById("regMsg");
+      const email = $("email").value.trim();
+      const password = $("password").value;
+      const dni = $("dni").value.trim();
+      const nombres = $("nombres").value.trim();
+      const apellidos = $("apellidos").value.trim();
+      const telefono = $("telefono").value.trim();
 
-      try{
-        if(!/^\d{8}$/.test(dni)) throw new Error("El DNI debe tener 8 dígitos.");
+      try {
+        if (!/^\d{8}$/.test(dni)) throw new Error("El DNI debe tener 8 dígitos.");
+        // Crea usuario
         const cred = await auth.createUserWithEmailAndPassword(email, password);
+        // Crea/actualiza cliente por DNI
         await db.collection("clients").doc(dni).set({
           dni, nombres, apellidos, telefono,
           createdBy: cred.user.uid,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        }, { merge: true });
+
         msg.className = "alert ok";
         msg.textContent = "Cuenta creada y cliente registrado. Ya puedes iniciar sesión.";
-      }catch(err){
+      } catch (err) {
         msg.className = "alert err";
-        msg.textContent = err.message;
-      }
-    });
-  </script>
-</body>
-</html>
+        if (err.code === "auth/email-already-in-use") {
+          msg.innerHTML = `Este correo ya está registrado. 
+            <a href="reset.html">Recupera tu c
