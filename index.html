@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Crédito Seguro · Iniciar sesión</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="card" style="max-width:520px;margin:40px auto">
+      <h1>Iniciar sesión</h1>
+      <p class="small">Autenticación con Firebase (corre en GitHub Pages)</p>
+      <div class="hr"></div>
+      <form id="loginForm">
+        <label>Correo</label>
+        <input id="email" type="email" required/>
+        <label>Contraseña</label>
+        <input id="password" type="password" required/>
+        <div style="display:flex;gap:12px;margin-top:12px">
+          <button class="btn btn-primary" type="submit">Entrar</button>
+          <a class="btn" href="register.html">Crear cuenta</a>
+          <a class="btn" href="reset.html">Olvidé mi contraseña</a>
+        </div>
+      </form>
+      <div id="loginMsg" class="alert hidden"></div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script>
+    const app = firebase.initializeApp(window.FIREBASE_CFG);
+    const auth = firebase.auth();
+
+    document.getElementById("loginForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const msg = document.getElementById("loginMsg");
+      try{
+        await auth.signInWithEmailAndPassword(email, password);
+        window.location.href = "dashboard.html";
+      }catch(err){
+        msg.className = "alert err";
+        msg.textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>

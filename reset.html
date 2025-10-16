@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Crédito Seguro · Recuperar contraseña</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="card" style="max-width:520px;margin:40px auto">
+      <h1>Recuperar contraseña</h1>
+      <div class="hr"></div>
+      <form id="resetForm">
+        <label>Correo</label>
+        <input id="email" type="email" required/>
+        <div style="display:flex;gap:12px;margin-top:12px">
+          <button class="btn btn-primary" type="submit">Enviar enlace</button>
+          <a class="btn" href="index.html">Volver a login</a>
+        </div>
+      </form>
+      <div id="resetMsg" class="alert hidden"></div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script>
+    const app = firebase.initializeApp(window.FIREBASE_CFG);
+    const auth = firebase.auth();
+    document.getElementById("resetForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const msg = document.getElementById("resetMsg");
+      try{
+        await auth.sendPasswordResetEmail(email);
+        msg.className = "alert ok";
+        msg.textContent = "Revisa tu correo para restablecer la contraseña.";
+      }catch(err){
+        msg.className = "alert err";
+        msg.textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>
