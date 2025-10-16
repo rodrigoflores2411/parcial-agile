@@ -4,25 +4,21 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Crédito Seguro · Dashboard</title>
-  <!-- Mini CSS inline para evitar “pantalla blanca” aunque no cargue styles.css -->
   <style>
     :root{--bg:#0f172a;--text:#e5e7eb;--card:#0b1222;--b:#334155;--mut:#94a3b8}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Inter,Arial}
     .container{max-width:980px;margin:0 auto;padding:24px}
-    .nav{display:flex;gap:12px;align-items:center;margin-bottom:16px}
-    .nav .spacer{flex:1}
+    .nav{display:flex;gap:12px;align-items:center;margin-bottom:16px}.nav .spacer{flex:1}
     .badge{display:inline-flex;padding:6px 10px;border:1px solid var(--b);border-radius:999px}
     .btn{padding:10px 14px;border-radius:12px;border:1px solid var(--b);background:#0b1222;color:var(--text);cursor:pointer}
     .btn-danger{background:#ef4444;border-color:transparent}
     .card{background:var(--card);border:1px solid #1f2937;border-radius:16px;padding:24px}
     .hr{height:1px;background:#111827;margin:12px 0}
     .row{display:grid;grid-template-columns:1fr;gap:16px}
-    @media(min-width:800px){.row{grid-template-columns:1fr}}
     .row3{display:grid;grid-template-columns:1fr;gap:16px}
     @media(min-width:900px){.row3{grid-template-columns:1fr 1fr 1fr}}
     label{display:block;margin:8px 0 6px;color:#cbd5e1}
     input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--b);background:#0b1222;color:var(--text)}
-    input:focus{outline:none;border-color:#22d3ee}
     .alert{padding:12px;border:1px solid #1f2937;border-radius:12px;background:#0b1222;margin:12px 0}
     .alert.ok{border-color:#134e4a}.alert.err{border-color:#7f1d1d}.small{color:var(--mut);font-size:12px}
     .table{width:100%;border-collapse:collapse;margin-top:12px}
@@ -31,8 +27,6 @@
     .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0}
     @media(min-width:900px){.kpi{grid-template-columns:repeat(4,1fr)}}
   </style>
-  <!-- (Opcional) tu CSS externo -->
-  <link rel="stylesheet" href="styles.css?v=11"/>
 </head>
 <body>
   <div class="container">
@@ -58,32 +52,14 @@
 
       <form id="loanForm">
         <div class="row3">
-          <div>
-            <label>Monto (S/)</label>
-            <input id="monto" type="number" step="0.01" required value="1000"/>
-          </div>
-          <div>
-            <label>Tasa anual (%)</label>
-            <input id="tasa" type="number" step="0.01" required value="24"/>
-          </div>
-          <div>
-            <label>Plazo (meses)</label>
-            <input id="plazo" type="number" required value="12"/>
-          </div>
+          <div><label>Monto (S/)</label><input id="monto" type="number" step="0.01" required value="1000"/></div>
+          <div><label>Tasa anual (%)</label><input id="tasa" type="number" step="0.01" required value="24"/></div>
+          <div><label>Plazo (meses)</label><input id="plazo" type="number" required value="12"/></div>
         </div>
         <div class="row3">
-          <div>
-            <label>IGV sobre interés (%)</label>
-            <input id="igv" type="number" step="0.01" value="18"/>
-          </div>
-          <div>
-            <label>Impuesto adicional sobre interés (%)</label>
-            <input id="otros" type="number" step="0.01" value="0"/>
-          </div>
-          <div>
-            <label>Fecha de inicio</label>
-            <input id="fecha" type="date"/>
-          </div>
+          <div><label>IGV sobre interés (%)</label><input id="igv" type="number" step="0.01" value="18"/></div>
+          <div><label>Impuesto adicional sobre interés (%)</label><input id="otros" type="number" step="0.01" value="0"/></div>
+          <div><label>Fecha de inicio</label><input id="fecha" type="date"/></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:12px">
           <button class="btn" type="button" id="exportPdf">Exportar PDF</button>
@@ -100,7 +76,7 @@
 
       <div id="savedMsg" class="small"></div>
 
-      <div id="resultWrap" class="">
+      <div id="resultWrap">
         <table class="table">
           <thead>
             <tr>
@@ -117,27 +93,24 @@
     <footer class="small">© Crédito Seguro · Demo</footer>
   </div>
 
-  <!-- SDKs -->
+  <!-- Debug primero -->
+  <script src="js/debug.js?v=12"></script>
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
   <!-- jsPDF -->
   <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-  <!-- Config + App -->
-  <script src="js/firebase-config.js?v=11"></script>
-  <script src="js/auth.js?v=11"></script>
-  <script src="js/loans.js?v=11"></script>
+  <!-- Tu config + app -->
+  <script src="js/firebase-config.js?v=12"></script>
+  <script src="js/auth.js?v=12"></script>
+  <script src="js/loans.js?v=12"></script>
 
   <script>
-    // Guard mínimo para que no quede en blanco
-    try {
-      window.requireAuth(true).then(()=> window._bindLogout());
-    } catch (e) {
-      console.error(e);
-      document.body.insertAdjacentHTML('beforeend',
-        '<div class="alert err">Error iniciando app: '+(e.message||e)+'</div>');
-    }
+    // Si algo peta, igual no se queda en blanco por debug.js
+    window.requireAuth?.(true).then(()=> window._bindLogout?.());
   </script>
 </body>
 </html>
