@@ -1,10 +1,9 @@
-// Rellena con tus credenciales de Firebase (Proyecto web).
-// Instrucciones: Firebase Console → Project Settings → Your apps (Web) → SDK setup.
+
 window.FIREBASE_CFG = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_STORAGE_BUCKET",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID",
+  apiKey: "AIzaSyAtpTZPA3gPbdV2A8pv2mIbEjbrPBNhBcM",
+  authDomain: "iaasd-d5b4c.firebaseapp.com",
+  projectId: "iaasd-d5b4c",
+  storageBucket: "iaasd-d5b4c.firebasestorage.app",
+  messagingSenderId: "435399328331",
+  appId: "1:435399328331:web:99789727ab39029e4a03ce",
 };
