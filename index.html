@@ -1,30 +1,27 @@
 <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
-<script src="js/firebase-config.js?v=6"></script>
+<script src="js/dom-ready.js?v=1"></script>
+<script src="js/firebase-config.js?v=13"></script>
 <script>
-  // Inicializa y siempre redirige al dashboard (SIN modo admin)
   const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(window.FIREBASE_CFG);
   const auth = firebase.auth();
 
-  document.getElementById("loginForm").addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    const msg = document.getElementById("loginMsg");
-    try{
-      await auth.signInWithEmailAndPassword(email, password);
-      window.location.href = "dashboard.html"; // <- siempre al dashboard
-    }catch(err){
-      msg.className = "alert err";
-      if (err.code === "auth/invalid-credential") {
-        msg.innerHTML = `Correo o contraseña incorrectos, o la cuenta no tiene contraseña.
-          <a href="reset.html">Recupera tu contraseña</a>.`;
-      } else if (err.code === "auth/user-not-found") {
-        msg.innerHTML = `No existe una cuenta con ese correo. <a href="register.html">Crear cuenta</a>.`;
-      } else {
-        msg.textContent = err.message;
+  onReady(() => {
+    on("loginForm", "submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email")?.value.trim();
+      const password = document.getElementById("password")?.value;
+      const msg = document.getElementById("loginMsg");
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        location.href = "dashboard.html";
+      } catch (err) {
+        msg.className = "alert err";
+        msg.textContent = err.code === "auth/invalid-credential"
+          ? "Correo o contraseña incorrectos."
+          : err.message;
       }
-    }
+    });
   });
 </script>
