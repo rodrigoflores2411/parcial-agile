@@ -11,7 +11,7 @@
     <div class="nav">
       <div class="badge">Crédito Seguro</div>
       <div class="spacer"></div>
-      <a href="admin.html" class="btn">Admin</a>
+      <!-- SIN botón Admin -->
       <button id="logoutBtn" class="btn btn-danger">Salir</button>
     </div>
 
@@ -20,7 +20,7 @@
       <p class="small">Selecciona un cliente, configura montos, tasas, IGV e impuestos, genera cronograma y guarda en Firestore.</p>
       <div class="hr"></div>
 
-      <!-- Solo selector de cliente (SIN apiperu) -->
+      <!-- Solo selector de cliente -->
       <div class="row">
         <div>
           <label>Selecciona cliente</label>
@@ -98,10 +98,10 @@
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-  <!-- Config + App (ya SIN api-config.js) -->
-  <script src="js/firebase-config.js?v=5"></script>
-  <script src="js/auth.js?v=5"></script>
-  <script src="js/loans.js?v=5"></script>
+  <!-- Config + App (SIN api-config.js) -->
+  <script src="js/firebase-config.js?v=6"></script>
+  <script src="js/auth.js?v=6"></script>
+  <script src="js/loans.js?v=6"></script>
 
   <script>
     window.requireAuth(true).then(()=> window._bindLogout());
