@@ -4,7 +4,35 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Crédito Seguro · Dashboard</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <!-- Mini CSS inline para evitar “pantalla blanca” aunque no cargue styles.css -->
+  <style>
+    :root{--bg:#0f172a;--text:#e5e7eb;--card:#0b1222;--b:#334155;--mut:#94a3b8}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Inter,Arial}
+    .container{max-width:980px;margin:0 auto;padding:24px}
+    .nav{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+    .nav .spacer{flex:1}
+    .badge{display:inline-flex;padding:6px 10px;border:1px solid var(--b);border-radius:999px}
+    .btn{padding:10px 14px;border-radius:12px;border:1px solid var(--b);background:#0b1222;color:var(--text);cursor:pointer}
+    .btn-danger{background:#ef4444;border-color:transparent}
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:16px;padding:24px}
+    .hr{height:1px;background:#111827;margin:12px 0}
+    .row{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:800px){.row{grid-template-columns:1fr}}
+    .row3{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:900px){.row3{grid-template-columns:1fr 1fr 1fr}}
+    label{display:block;margin:8px 0 6px;color:#cbd5e1}
+    input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--b);background:#0b1222;color:var(--text)}
+    input:focus{outline:none;border-color:#22d3ee}
+    .alert{padding:12px;border:1px solid #1f2937;border-radius:12px;background:#0b1222;margin:12px 0}
+    .alert.ok{border-color:#134e4a}.alert.err{border-color:#7f1d1d}.small{color:var(--mut);font-size:12px}
+    .table{width:100%;border-collapse:collapse;margin-top:12px}
+    .table th,.table td{border-bottom:1px solid #1f2937;padding:10px;text-align:right}
+    .table th:first-child,.table td:first-child{text-align:left}
+    .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0}
+    @media(min-width:900px){.kpi{grid-template-columns:repeat(4,1fr)}}
+  </style>
+  <!-- (Opcional) tu CSS externo -->
+  <link rel="stylesheet" href="styles.css?v=11"/>
 </head>
 <body>
   <div class="container">
@@ -19,7 +47,6 @@
       <p class="small">Selecciona un cliente, configura montos, tasas, IGV e impuestos, genera cronograma y guarda en Firestore.</p>
       <div class="hr"></div>
 
-      <!-- Solo selector de cliente -->
       <div class="row">
         <div>
           <label>Selecciona cliente</label>
@@ -29,7 +56,6 @@
       </div>
       <div id="verifyMsg" class="alert small"></div>
 
-      <!-- Formulario del préstamo -->
       <form id="loanForm">
         <div class="row3">
           <div>
@@ -59,9 +85,9 @@
             <input id="fecha" type="date"/>
           </div>
         </div>
-        <div class="flex" style="margin-top:12px">
-          <button class="btn btn-primary" type="submit">Generar cronograma</button>
+        <div style="display:flex;gap:8px;margin-top:12px">
           <button class="btn" type="button" id="exportPdf">Exportar PDF</button>
+          <button class="btn" type="submit">Generar cronograma</button>
         </div>
       </form>
 
@@ -74,7 +100,7 @@
 
       <div id="savedMsg" class="small"></div>
 
-      <div id="resultWrap" class="hidden">
+      <div id="resultWrap" class="">
         <table class="table">
           <thead>
             <tr>
@@ -88,22 +114,30 @@
       </div>
     </div>
 
-    <footer>© Crédito Seguro · Demo</footer>
+    <footer class="small">© Crédito Seguro · Demo</footer>
   </div>
 
   <!-- SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <!-- Config + App -->
-  <script src="js/firebase-config.js?v=8"></script>
-  <script src="js/auth.js?v=8"></script>
-  <script src="js/loans.js?v=8"></script>
+  <script src="js/firebase-config.js?v=11"></script>
+  <script src="js/auth.js?v=11"></script>
+  <script src="js/loans.js?v=11"></script>
 
   <script>
-    window.requireAuth(true).then(()=> window._bindLogout());
+    // Guard mínimo para que no quede en blanco
+    try {
+      window.requireAuth(true).then(()=> window._bindLogout());
+    } catch (e) {
+      console.error(e);
+      document.body.insertAdjacentHTML('beforeend',
+        '<div class="alert err">Error iniciando app: '+(e.message||e)+'</div>');
+    }
   </script>
 </body>
 </html>
