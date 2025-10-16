@@ -185,3 +185,6 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
+const newDni = document.getElementById("newDni");
+const addClientBtn = document.getElementById("addClientBtn");
+const addClientMsg = document.getElementById("addClientMsg");
