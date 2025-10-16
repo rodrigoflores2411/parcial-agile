@@ -20,24 +20,7 @@
       <p class="small">Selecciona un cliente, configura montos, tasas, IGV e impuestos, genera cronograma y guarda en Firestore.</p>
       <div class="hr"></div>
 
-      <!-- 1) Alta rápida usando API (apiperu.dev) -->
-      <h3>Nuevo cliente por DNI (apiperu)</h3>
-      <div class="row">
-        <div>
-          <label>DNI</label>
-          <div class="flex">
-            <input id="newDni" type="text" placeholder="8 dígitos" minlength="8" maxlength="8"/>
-            <button id="addClientBtn" class="btn" type="button">Consultar y crear</button>
-          </div>
-        </div>
-        <div>
-          <label>Resultado</label>
-          <div id="addClientMsg" class="alert small"></div>
-        </div>
-      </div>
-      <div class="hr"></div>
-
-      <!-- 2) Selector de cliente existente -->
+      <!-- Solo selector de cliente (SIN apiperu) -->
       <div class="row">
         <div>
           <label>Selecciona cliente</label>
@@ -47,7 +30,7 @@
       </div>
       <div id="verifyMsg" class="alert small"></div>
 
-      <!-- 3) Formulario del préstamo -->
+      <!-- Formulario del préstamo -->
       <form id="loanForm">
         <div class="row3">
           <div>
@@ -115,11 +98,10 @@
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-  <!-- Config + API + App (AQUÍ va tu API) -->
-  <script src="js/firebase-config.js?v=4"></script>
-  <script src="js/api-config.js"></script> <!-- <- aquí se cargan token/baseUrl de apiperu.dev -->
-  <script src="js/auth.js?v=4"></script>
-  <script src="js/loans.js?v=4"></script>
+  <!-- Config + App (ya SIN api-config.js) -->
+  <script src="js/firebase-config.js?v=5"></script>
+  <script src="js/auth.js?v=5"></script>
+  <script src="js/loans.js?v=5"></script>
 
   <script>
     window.requireAuth(true).then(()=> window._bindLogout());
